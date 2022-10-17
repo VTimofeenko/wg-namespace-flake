@@ -1,0 +1,33 @@
+# Sourced from archwiki on 2022-03-20
+# https://wiki.archlinux.org/title/Nftables#Workstation
+# Adapted to not having any LAN or IPv6
+
+flush ruleset
+
+  table
+  inet
+  my_table
+{
+  chain my_input {
+  type filter hook input priority filter; policy drop;
+  iif lo accept comment "Accept any localhost traffic"
+
+  ct state invalid drop comment "Drop invalid connections"
+  ct state established,related accept comment "Accept traffic originated from us"
+
+  meta l4proto icmp accept comment "Accept ICMP"
+  ip protocol igmp accept comment "Accept IGMP"
+
+  counter comment "Count any other traffic"
+  }
+
+  chain my_forward {
+  type filter hook forward priority filter; policy drop;
+  # Drop everything forwarded to us. We do not forward. That is routers job.
+  }
+
+  chain my_output {
+  type filter hook output priority filter; policy accept;
+  # Accept every outbound connection
+  }
+  }
