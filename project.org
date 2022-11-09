@@ -15,7 +15,7 @@ The page is structured to match the implementation of the project. If you want t
 :header-args:nix: :tangle flake.nix :padline no
 :END:
 
-The flake will not have any specific inputs beyond *nixpkgs~.
+The flake will not have any specific inputs beyond ~nixpkgs~.
 
 #+begin_src nix
 {
