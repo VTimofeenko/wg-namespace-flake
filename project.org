@@ -1,8 +1,8 @@
 #+TITLE: Wireguard namespace flake
 #+AUTHOR: Vladimir Timofeenko
 #+EMAIL: id@vtimofeenko.com
-#+TAGS: fix(b) feat(f) doc(d) chore(c) to_think(t)
 #+DATE: <2022-11-09 Wed>
+#+TAGS[]: fix(b) feat(f) doc(d) chore(c) to_think(t)
 
 * About the project
 
