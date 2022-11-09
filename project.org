@@ -308,6 +308,54 @@ The module will configure the network adapter to:
 
 * Usage example
 
+To use this project:
+
+1. Add it as an input for the system configuration flake, for example:
+
+    #+begin_src nix :tangle no
+    inputs = {
+      ...
+      wg-namespace-flake = {
+        url = "github:VTimofeenko/wg-namespace-flake";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+      ...
+    }
+    #+end_src
+2. Add the ~inputs.wg-namespace-flake.nixosModules.default~ to the list of imported modules
+3. Configure the service by importing a module like this (assumes using [[https://github.com/ryantm/agenix][agenix]] for secret management):
+
+    #+begin_src nix :tangle no
+    { config, ... }:
+    {
+      services.wireguard-namespace = {
+        dns_server = "<SOME_DNS_SERVER>";
+        ips = [ "<INTERFACE-SPECIFIC-IP-ADDRESS>" ];
+        privateKeyFile = config.age.secrets.my_vpn_key.path;
+        peers = [
+          {
+            publicKey = "<PUBLIC_KEY>";
+            allowedIPs = [ "0.0.0.0/0" ];  # To route all traffic through this peer
+            endpoint = "<ENDPOINT>";
+          }
+        ];
+      };
+    }
+    #+end_src
+
+4. Run ~nixos-rebuild switch~
+
+As a result, the commands running the namespace with the VPN will route the traffic through the peer:
+
+#+begin_src shell
+# outside the namespace
+❯ curl ifconfig.co
+<local IP>
+# inside the namespace
+❯ firejail --noprofile --blacklist=/var/run/nscd/socket --netns=vpn --dns=10.2.1.2 curl ifconfig.co 2>/dev/null
+<Outgoing IP of the peer>
+#+end_src
+
 ;; Local Variables:
 ;; eval: (load-file (expand-file-name "nftables-mode.el" (file-name-directory (buffer-file-name))))
 ;; eval: (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
