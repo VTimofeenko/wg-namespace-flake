@@ -4,7 +4,11 @@
 #+DATE: <2022-11-09 Wed>
 #+TAGS[]: fix(b) feat(f) doc(d) chore(c) to_think(t)
 
-* About the project
+For a while I have been playing with the idea of running certain simple services in Linux namespaces to achieve network isolation from the "host" system on a desktop Linux. This project, written in literate programming style, is an Nix-based implementation of a configurable network namespace that uses Wireguard.
+
+# more
+
+The page is structured to match the implementation of the project. If you want to just use it -- jump straight to [[*Usage example][Usage example]] section.
 
 * Flake
 :PROPERTIES:
