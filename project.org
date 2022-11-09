@@ -2,6 +2,7 @@
 #+AUTHOR: Vladimir Timofeenko
 #+EMAIL: id@vtimofeenko.com
 #+TAGS: fix(b) feat(f) doc(d) chore(c) to_think(t)
+#+DATE: <2022-11-09 Wed>
 
 * About the project
 
