@@ -152,7 +152,7 @@ in
         rpc:       files
       '';
     };
-    environment.etc."netns/${cfg.namespace_name}/${cfg.namespace_name}.nft".text = ''
+    environment.etc."nftables.d/${cfg.namespace_name}-namespace/${cfg.namespace_name}.nft".text = ''
       ${builtins.readFile ./namespace_default_fw.nft}
 
       ${cfg.extraFirewallRules}
@@ -165,7 +165,7 @@ in
       peers = cfg.peers;
       preSetup = [
         ''${pkgs.iproute2}/bin/ip netns add ${cfg.namespace_name}''
-        ''${pkgs.iproute2}/bin/ip netns exec ${cfg.namespace_name} ${pkgs.nftables}/bin/nft --file /etc/nftables.d/${cfg.namespace_name}.nft''
+        ''${pkgs.iproute2}/bin/ip netns exec ${cfg.namespace_name} ${pkgs.nftables}/bin/nft --file /etc/nftables.d/${cfg.namespace_name}-namespace/${cfg.namespace_name}.nft''
 
       ];
       postShutdown = [ ''${pkgs.iproute2}/bin/ip netns del ${cfg.namespace_name}'' ];

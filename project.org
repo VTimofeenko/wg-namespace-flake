@@ -269,7 +269,7 @@ table inet my_table {
 This file will be placed inside the ~etc/netns/vpn~ and the namespace will be configured to use that set of rules. If ~cfg.extraFirewallRules~ value is specified - it will be appended to the default rules.
 
 #+begin_src nix
-    environment.etc."netns/${cfg.namespace_name}/${cfg.namespace_name}.nft".text = ''
+    environment.etc."nftables.d/${cfg.namespace_name}-namespace/${cfg.namespace_name}.nft".text = ''
       ${builtins.readFile ./namespace_default_fw.nft}
 
       ${cfg.extraFirewallRules}
@@ -296,7 +296,7 @@ The module will configure the network adapter to:
 #+begin_src nix
       preSetup = [
         ''${pkgs.iproute2}/bin/ip netns add ${cfg.namespace_name}''
-        ''${pkgs.iproute2}/bin/ip netns exec ${cfg.namespace_name} ${pkgs.nftables}/bin/nft --file /etc/nftables.d/${cfg.namespace_name}.nft''
+        ''${pkgs.iproute2}/bin/ip netns exec ${cfg.namespace_name} ${pkgs.nftables}/bin/nft --file /etc/nftables.d/${cfg.namespace_name}-namespace/${cfg.namespace_name}.nft''
 
       ];
       postShutdown = [ ''${pkgs.iproute2}/bin/ip netns del ${cfg.namespace_name}'' ];
