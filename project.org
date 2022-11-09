@@ -311,6 +311,6 @@ The module will configure the network adapter to:
 ;; Local Variables:
 ;; eval: (load-file (expand-file-name "nftables-mode.el" (file-name-directory (buffer-file-name))))
 ;; eval: (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
-;; eval: (defun nixpkgs-fmt-on-tangle() (when (string-suffix-p ".nix" (buffer-file-name) (shell-command (format "nixpkgs-fmt %s" (buffer-file-name))))))
+;; eval: (defun nixpkgs-fmt-on-tangle() (when (string-suffix-p ".nix" (buffer-file-name)) (shell-command (format "nixpkgs-fmt %s" (buffer-file-name)))))
 ;; eval: (add-hook 'org-babel-post-tangle-hook 'nixpkgs-fmt-on-tangle)
 ;; End:
