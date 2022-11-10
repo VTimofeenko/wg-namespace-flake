@@ -4,11 +4,11 @@
 #+DATE: <2022-11-09 Wed>
 #+TAGS[]: fix(b) feat(f) doc(d) chore(c) to_think(t)
 
-For a while I have been playing with the idea of running certain simple services in Linux namespaces to achieve network isolation from the "host" system on a desktop Linux. This project, written in literate programming style, is an Nix-based implementation of a configurable network namespace that uses Wireguard.
+For a while I have been playing with the idea of running services in Linux namespaces to achieve network isolation from the "host" system on Linux. This project, written in literate programming style, is an Nix-based implementation of a configurable network namespace that uses Wireguard.
 
 # more
 
-The page is structured to match the implementation of the project. If you want to just use it -- jump straight to [[*Usage example][Usage example]] section.
+The page is structured to match the implementation of the project. If you want to just use it -- jump straight to [[id:96f91475-f2c6-4b32-bc3c-116f9efd70ca][Usage example]] section.
 
 * Flake
 :PROPERTIES:
@@ -44,11 +44,13 @@ By definition, Nix modules are functions that return attribute sets. This module
 - pkgs :: reference to current version of nixpkgs repository
 - lib :: a collection of helper functions
 - config :: reference to the system configuration
+
 #+begin_src nix
 { pkgs, lib, config, ... }:
 #+end_src
 
-The latter parameter will be used to retrieve the service's configuration if it's defined:
+The latter parameter will be used to retrieve the service's configuration if it's defined in the rest of the system configuration:
+
 #+begin_src nix
 let
   cfg = config.services.wireguard-namespace;
@@ -200,12 +202,15 @@ This module will be passing a lot of options directly to ~nixpkgs~' default wire
 #+end_src
 
 ** Config
+
 Now, for the implementation, that is wrapped in ~config~ attribute:
 
 #+begin_src nix
   config = {
 #+end_src
+
 *** Preventing DNS leaks
+
 Linux network namespaces allow bind-mounting files in ~/etc/netns/<NAMESPACE_NAME>~ over files in ~/etc~. Processes within the namespace will only see the contents of the bind-mounted files.
 
 This approach does have drawbacks, as bind-mounts disappear if the original file's inode changes. See [[https://unix.stackexchange.com/questions/418304/why-do-linux-bind-mounts-disappear-if-the-mount-points-inode-changes][this SO thread]].
@@ -234,7 +239,9 @@ But it's better than nothing. Alternative approach to consider is using the ~nft
 
 
 **** TODO add DNS leak prevention to nftables :feat:
+
 *** Firewall
+
 Speaking of, the namespace also has its own firewall. On a generic client machine typically no ports should be listening in the namespace, so the firewall should just disallow all forwarding and input:
 
 #+begin_src nftables :tangle modules/namespace_default_fw.nft
@@ -270,8 +277,11 @@ table inet my_table {
 }
 #+end_src
 
+For convenience, the repository also contains nftables mode for emacs.
+
 *** Putting it all together
-This file will be placed inside the ~etc/netns/vpn~ and the namespace will be configured to use that set of rules. If ~cfg.extraFirewallRules~ value is specified - it will be appended to the default rules.
+
+The file with the firewall rules will be placed inside the ~etc/nftables.d/~ and the namespace will be configured to use that set of rules. If ~cfg.extraFirewallRules~ value is specified - it will be appended to the default rules.
 
 #+begin_src nix
     environment.etc."nftables.d/${cfg.namespace_name}-namespace/${cfg.namespace_name}.nft".text = ''
@@ -313,7 +323,7 @@ The module will configure the network adapter to:
 
 * Usage example
 
-To use this project:
+To use this flake:
 
 1. Add it as an input for the system configuration flake, for example:
 
@@ -363,6 +373,12 @@ As a result, the commands running the namespace with the VPN will route the traf
 
 
 * Literate setup :noexport:
+
+A few scripts to be automatically run:
+
+- Load the nftables mode for syntax highlighting
+- When the file is saved - tangle all code blocks
+- For all tangled .nix files - run ~nixpkgs-fmt~ on them to format the code
 
 ;; Local Variables:
 ;; eval: (load-file (expand-file-name "nftables-mode.el" (file-name-directory (buffer-file-name))))
