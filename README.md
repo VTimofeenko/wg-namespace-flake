@@ -3,7 +3,7 @@
 > support namespaces: [pull request in systemd
 > repo](https://github.com/systemd/systemd/pull/14915)
 
-This is a Nix flake that configures a Linux namespace and a Wireguard adapter in it.
+This is a Nix flake that configures a Linux namespace and a WireGuard adapter in it.
 
 # Usage
 
