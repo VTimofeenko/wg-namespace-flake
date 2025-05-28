@@ -37,6 +37,16 @@ in
     systemd.services."wg-netnamespace@${cfg.namespaceName}" = {
       # Implementation
       script =
+        let
+          firewallRules = pkgs.writeTextFile {
+            name = "nft-rules";
+            text = ''
+              ${builtins.readFile ./namespace_default_fw.nft}
+
+              ${cfg.extraFirewallRules}
+            '';
+          };
+        in
         # bash
         ''
           IFACE_NAME=${cfg.interfaceName}
@@ -55,10 +65,12 @@ in
           ip -netns "''${NAMESPACE_NAME}" link set up dev "''${IFACE_NAME}"
           # Assume all traffic should go through the interface
           ip -netns "''${NAMESPACE_NAME}" route add default dev "''${IFACE_NAME}"
-        ''; # TODO: add nftables
+          ip netns exec "''${NAMESPACE_NAME}" ${lib.getExe pkgs.nftables} --file ${firewallRules}
+        '';
       path = [
         pkgs.iproute2
         pkgs.jq
+        pkgs.nftables
       ];
       serviceConfig.ExecStop = lib.getExe (
         pkgs.writeShellApplication {
