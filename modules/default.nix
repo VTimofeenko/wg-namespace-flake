@@ -87,6 +87,7 @@ in
         RemainAfterExit = "yes";
       };
       after = [ "network-online.target" ]; # TODO: maybe order specifically after the interface is up?
+      requires = [ "network-online.target" ];
 
       # TODO: hardening
 
