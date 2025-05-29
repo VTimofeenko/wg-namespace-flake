@@ -101,7 +101,44 @@ in
       after = [ "network-online.target" ]; # TODO: maybe order specifically after the interface is up?
       requires = [ "network-online.target" ];
 
-      # TODO: hardening
+      # Hardening.
+      # The systemd service operates on network namespaces, so it needs some
+      # broad permissions. I have tried to enable some mitigations, but there's
+      # still probably room for improvement
+      serviceConfig = {
+        SystemCallFilter =
+          lib.pipe
+            [
+              "swap"
+              "resources"
+              "obsolete"
+              "reboot"
+              "raw-io"
+              "privileged"
+              "debug"
+              "clock"
+            ]
+            # Pipeline that constructs the calls filter sets and inverts them at the end
+            [
+              (map (x: "@${x}"))
+              (lib.concatStringsSep " ")
+              (x: "~${x}")
+            ];
+        RestrictAddressFamilies = "AF_INET AF_INET6 AF_NETLINK";
+        NoNewPrivileges = true;
+        RestrictRealtime = true;
+        LockPersonality = true;
+        SystemCallArchitectures = "native";
+        MemoryDenyWriteExecute = true;
+        ProtectClock = true;
+        ProtectHostname = true;
+        RestrictNamespaces = "~user ipc pid uts cgroup";
+        CapabilityBoundingSet = "~CAP_SETGID CAP_SETUID CAP_BLOCK_SUSPEND CAP_SYS_BOOT CAP_SYS_CHROOT CAP_SYS_RAWIO CAP_SYS_TTY_CONFIG CAP_BPF";
+        RestrictSUIDSGID = true;
+        # Known to break the service
+        ProtectKernelTunables = false; # Breaks start
+        ProtectHome = false; # Breaks start
+      };
 
       # Misc
       description = "WireGuard isolated network namespace (%i)";
